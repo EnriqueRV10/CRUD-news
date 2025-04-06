@@ -1,63 +1,59 @@
 import axiosInstance from "@/services/axiosInstance";
-import axios from "axios";
 
 // Funcion para obtener todas las noticias
 export const fetchNews = async ({
-    status = 1,
-    publish_status,
-    page,
-    pageSize,
-    search = '',
-    subordinates = 'all'
-  }: {
-    status: number;
-    publish_status?: number;  // Parámetro opcional
-    page: number;
-    pageSize: number;
-    search?: string;  // Parámetro opcional
-    subordinates?: string;  // Parámetro opcional
-  }) => {
-
-    const params: Record<string, any> = {
-        status,
-        search,
-        page,
-        page_size: pageSize,
-        subordinates,
-      };
-
-      if (publish_status !== undefined) {
-        params.publish_status = publish_status;
-      }
-    
-      const response = await axiosInstance.get('/api/v2/news/', {
-        params
-      });
-
-    const filteredNews = response.data.results.map((news: any) => ({
-        key: news.id,
-        title: news.title,
-        author: news.author,
-        start: news.start,
-        end: news.end,
-        status: news.publish_status,
-        // Verifica si el campo 'read' existe y es un arreglo
-        stats: news.read && Array.isArray(news.read) 
-               ? new Set(news.read.map((readEntry: any) => readEntry.actor__code)).size 
-               : 0, // Si no existe o no es un arreglo, stats será 0
-    }));
-
-    return {
-        results: filteredNews, // array de resultados
-        total: response.data.count, // Número total de elementos
-        currentPage: page,          // Página actual
-        pageSize: pageSize,         // Tamaño de página
-    };
-    
+  status = 1,
+  publish_status,
+  page,
+  pageSize,
+  search = '',
+  subordinates = 'all',
+}: {
+  status: number;
+  publish_status?: number;
+  page: number;
+  pageSize: number;
+  search?: string;
+  subordinates?: string;
+}) => {
+  const params: Record<string, any> = {
+    status,
+    search,
+    _page: page,
+    _limit: pageSize,
+    subordinates,
   };
+
+  if (publish_status !== undefined) {
+    params.publish_status = publish_status;
+  }
+
+  const response = await axiosInstance.get('/news', { params });
+
+  const filteredNews = response.data.map((news: any) => ({
+    key: news.id,
+    title: news.title,
+    author: news.author,
+    start: news.start,
+    end: news.end,
+    status: news.publish_status,
+    stats: news.read && Array.isArray(news.read)
+      ? new Set(news.read.map((readEntry: any) => readEntry.actor__code)).size
+      : 0,
+  }));
+
+  return {
+    results: filteredNews,
+    total: Number(response.headers['x-total-count']) || filteredNews.length,
+    currentPage: page,
+    pageSize: pageSize,
+  };
+};
+
 
 
 // Funcion para obtener los contadores de las noticias
+
 export const fetchNewsCounters = async ({
   status = 1,
   subordinates = 'all'
@@ -65,48 +61,58 @@ export const fetchNewsCounters = async ({
   status?: number;
   subordinates?: string;
 }) => {
-  const params: Record<string, any> = {
-    status,
-    subordinates,
-  };
-
-  const response = await axiosInstance.get('/api/v2/news_counters/',{
-    params
+  // Obtenemos todas las noticias con un pageSize muy alto para traerlas todas
+  const { results } = await fetchNews({
+    status: status || 1,
+    page: 1,
+    pageSize: 1000, // o un número que asegure traer todas
+    subordinates: subordinates || 'all',
+    search: ''
   });
 
-  return response.data;
+  // Creamos contadores simples como ejemplo
+  const published = results.filter((n: { status: number; }) => n.status === 1).length;
+  const draft = results.filter((n: { status: number; }) => n.status === 0).length;
+  const scheduled = results.filter((n: { status: number; }) => n.status === 2).length;
 
+  return {
+    total: results.length,
+    published,
+    draft,
+    scheduled,
+  };
 };
+
+
 
 //Funcion para obtener la informacion de una noticia
-export const fetchSingleNews = async ({ id, subordinates = 'all' }:{ id : string; subordinates?: string}) => { 
-  const params: Record<string, any> = { subordinates };
-
-  const response = await axiosInstance.get(`/api/v2/news/${id}/`,{params});
-
-  return response
-};
-
-// Funcion para realizar una prueba de asignacion
-export const testAssignment = async (payload: any) => {
-  const response = await axiosInstance.post('/api/v1/employees/test_kql/', payload);
+export const fetchSingleNews = async (id: string) => {
+  const response = await axiosInstance.get(`/news/${id}`);
   return response.data;
 };
+
+
+// Funcion para realizar una prueba de asignacion
+// export const testAssignment = async (payload: any) => {
+//   const response = await axiosInstance.post('/api/v1/employees/test_kql/', payload);
+//   return response.data;
+// };
 
 // Funcion para actualizar una noticia
 export const updateNews = async (id: string, payload: any) => {
-  const response = await axiosInstance.put(`/api/v2/news/${id}/`, payload);
+  const response = await axiosInstance.put(`/news/${id}`, payload);
   return response.data;
 };
 
 // Funcion para eliminar una noticia
 export const deleteNews = async (id: string) => {
-  const response = await axiosInstance.delete(`/api/v2/news/${id}/`);
+  const response = await axiosInstance.delete(`/news/${id}`);
   return response;
 };
 
+
 // Funcion para crear noticia
 export const createNews = async (payload: any) => {
-  const response = await axiosInstance.post(`/api/v2/news/`, payload);
+  const response = await axiosInstance.post(`/news`, payload);
   return response;
-}
+};

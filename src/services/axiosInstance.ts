@@ -1,39 +1,10 @@
-import axios from 'axios';
-import { useTenantStore } from '@/store/tenantStore';
+import axios from "axios";
 
-const createAxiosInstance = () => {
-  const instance = axios.create({
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  instance.interceptors.request.use(
-    (config) => {
-      const { tenant, md5, user, isDefault } = useTenantStore.getState();
-
-      if (md5 === 'defaultmd5') {
-        console.warn('Ensure NEXT_PUBLIC_KEY is set.');
-      }
-
-      config.baseURL = `https://${tenant}.kimetrics.com`;
-
-      if (user) {
-        config.params = { ...config.params, user };
-      }
-
-      config.headers.Authorization = `Basic ${md5}`;
-
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
-
-  return instance;
-};
-
-const axiosInstance = createAxiosInstance();
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:3001", // o tu nuevo backend
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export default axiosInstance;
