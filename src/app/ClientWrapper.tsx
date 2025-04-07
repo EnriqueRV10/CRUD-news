@@ -5,7 +5,6 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import React from "react";
 import esEs from 'antd/locale/es_ES';
-import { TenantInitializer } from "@/components/TenantInitializer";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +25,6 @@ export default function ClientWrapper({
     >
       <QueryClientProvider client={queryClient}>
         <AntdRegistry>
-          <TenantInitializer />
           {children}
         </AntdRegistry>
       </QueryClientProvider>

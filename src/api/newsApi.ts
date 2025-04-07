@@ -1,13 +1,13 @@
 import axiosInstance from "@/services/axiosInstance";
 
-// Funcion para obtener todas las noticias
+// Obtener todas las noticias con paginación, filtro de estado y búsqueda
 export const fetchNews = async ({
   status = 1,
   publish_status,
   page,
   pageSize,
   search = '',
-  subordinates = 'all',
+  subordinates = 'all', // este campo no se usa con JSON Server pero se mantiene por compatibilidad
 }: {
   status: number;
   publish_status?: number;
@@ -18,14 +18,16 @@ export const fetchNews = async ({
 }) => {
   const params: Record<string, any> = {
     status,
-    search,
     _page: page,
     _limit: pageSize,
-    subordinates,
   };
 
   if (publish_status !== undefined) {
     params.publish_status = publish_status;
+  }
+
+  if (search) {
+    params.q = search;
   }
 
   const response = await axiosInstance.get('/news', { params });
@@ -37,8 +39,8 @@ export const fetchNews = async ({
     start: news.start,
     end: news.end,
     status: news.publish_status,
-    stats: news.read && Array.isArray(news.read)
-      ? new Set(news.read.map((readEntry: any) => readEntry.actor__code)).size
+    stats: Array.isArray(news.read)
+      ? new Set(news.read.map((r: any) => r.actor__code)).size
       : 0,
   }));
 
@@ -46,34 +48,29 @@ export const fetchNews = async ({
     results: filteredNews,
     total: Number(response.headers['x-total-count']) || filteredNews.length,
     currentPage: page,
-    pageSize: pageSize,
+    pageSize,
   };
 };
 
-
-
-// Funcion para obtener los contadores de las noticias
-
+// Obtener contadores de noticias en frontend (publicadas, borradores, programadas)
 export const fetchNewsCounters = async ({
   status = 1,
-  subordinates = 'all'
+  subordinates = 'all',
 }: {
   status?: number;
   subordinates?: string;
 }) => {
-  // Obtenemos todas las noticias con un pageSize muy alto para traerlas todas
   const { results } = await fetchNews({
-    status: status || 1,
+    status: status ?? 1,
     page: 1,
-    pageSize: 1000, // o un número que asegure traer todas
-    subordinates: subordinates || 'all',
-    search: ''
+    pageSize: 1000,
+    subordinates: subordinates ?? 'all',
+    search: '',
   });
 
-  // Creamos contadores simples como ejemplo
-  const published = results.filter((n: { status: number; }) => n.status === 1).length;
-  const draft = results.filter((n: { status: number; }) => n.status === 0).length;
-  const scheduled = results.filter((n: { status: number; }) => n.status === 2).length;
+  const published = results.filter((n: any) => n.status === 1).length;
+  const draft = results.filter((n: any) => n.status === 0).length;
+  const scheduled = results.filter((n: any) => n.status === 2).length;
 
   return {
     total: results.length,
@@ -83,36 +80,26 @@ export const fetchNewsCounters = async ({
   };
 };
 
-
-
-//Funcion para obtener la informacion de una noticia
+// Obtener una noticia por ID
 export const fetchSingleNews = async (id: string) => {
   const response = await axiosInstance.get(`/news/${id}`);
   return response.data;
 };
 
+// Crear nueva noticia
+export const createNews = async (payload: any) => {
+  const response = await axiosInstance.post(`/news`, payload);
+  return response.data;
+};
 
-// Funcion para realizar una prueba de asignacion
-// export const testAssignment = async (payload: any) => {
-//   const response = await axiosInstance.post('/api/v1/employees/test_kql/', payload);
-//   return response.data;
-// };
-
-// Funcion para actualizar una noticia
+// Actualizar noticia
 export const updateNews = async (id: string, payload: any) => {
   const response = await axiosInstance.put(`/news/${id}`, payload);
   return response.data;
 };
 
-// Funcion para eliminar una noticia
+// Eliminar noticia
 export const deleteNews = async (id: string) => {
   const response = await axiosInstance.delete(`/news/${id}`);
-  return response;
-};
-
-
-// Funcion para crear noticia
-export const createNews = async (payload: any) => {
-  const response = await axiosInstance.post(`/news`, payload);
-  return response;
+  return response.data;
 };

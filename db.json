@@ -1,0 +1,28 @@
+{
+    "news": [
+      {
+        "id": "1",
+        "title": "Primera noticia",
+        "author": "admin",
+        "start": "2025-04-01",
+        "end": "2025-04-10",
+        "publish_status": 1,
+        "status": 1,
+        "read": [
+          { "actor__code": "U001" },
+          { "actor__code": "U002" }
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Segunda noticia",
+        "author": "admin",
+        "start": "2025-04-02",
+        "end": "2025-04-12",
+        "publish_status": 0,
+        "status": 1,
+        "read": []
+      }
+    ]
+  }
+  
