@@ -1,20 +1,22 @@
-import type { Metadata } from "next";
-import "./globals.css";
+'use client';
 
-export const metadata: Metadata = {
-  title: "CRUD news",
-  description: "Gestión de noticias",
-};
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import "./globals.css";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <html lang="es">
       <body>
-        {children}
+        <QueryClientProvider client={queryClient} >
+          {children}
+        </QueryClientProvider>
       </body>
     </html>
   );
