@@ -1,13 +1,12 @@
-'use client'
+"use client";
 
-import Header from "@/components/header";
-import { columns } from "@/components/DataTable/columns";
-import { DataTable } from "@/components/DataTable/dataTable";
+import Header from "@/features/news/components/header";
+import { columns } from "@/features/news/components/DataTable/columns";
+import { DataTable } from "@/features/news/components/DataTable/dataTable";
 import { useNews } from "@/hooks/useNews";
 
 export default function Home() {
-  const { data: news, isLoading } = useNews();
-
+  const { data: news } = useNews();
 
   return (
     <main>

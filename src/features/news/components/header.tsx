@@ -1,5 +1,5 @@
-import { Button } from "./ui/button";
-import StatsNews from "./statsNews";
+import { Button } from "@/components/ui/button";
+import StatsNews from "@/features/news/components/statsNews";
 
 export default function Header() {
   return (
@@ -13,4 +13,4 @@ export default function Header() {
       </div>
     </header>
   );
-} 
+}

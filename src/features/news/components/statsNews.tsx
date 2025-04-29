@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "./ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useNews } from "@/hooks/useNews";
 
 export default function StatsNews() {
-  const { data: news, isLoading } = useNews();
+  const { data: news } = useNews();
 
   const stats = {
-    published: news?.filter(n => n.status === 'published').length || 0,
-    preview: news?.filter(n => n.status === 'preview').length || 0,
-    draft: news?.filter(n => n.status === 'draft').length || 0,
+    published: news?.filter((n) => n.status === "published").length || 0,
+    preview: news?.filter((n) => n.status === "preview").length || 0,
+    draft: news?.filter((n) => n.status === "draft").length || 0,
   };
 
   return (
