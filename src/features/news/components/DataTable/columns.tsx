@@ -3,15 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import ActionsCell from "./actionsCell";
 
 export type NewsItem = {
   id: number;
@@ -38,6 +30,17 @@ export const columns: ColumnDef<NewsItem>[] = [
   {
     accessorKey: "title",
     header: "Título",
+    cell: ({ row }) => {
+      const title = row.getValue("title") as NewsItem["title"];
+      return (
+        <a
+          href={`/news/${row.original.id}`}
+          className=" hover:underline hover:text-neutral-600"
+        >
+          {title}
+        </a>
+      );
+    },
   },
   {
     accessorKey: "author",
@@ -58,11 +61,7 @@ export const columns: ColumnDef<NewsItem>[] = [
     header: "Estado",
     cell: ({ row }) => {
       const status = row.getValue("status") as NewsItem["status"];
-      return (
-        <Badge variant="outline" className={statusClass[status]}>
-          {status}
-        </Badge>
-      );
+      return <Badge className={statusClass[status]}>{status}</Badge>;
     },
   },
   {
@@ -75,10 +74,11 @@ export const columns: ColumnDef<NewsItem>[] = [
     },
   },
   {
-    accessorKey: "actions",
+    id: "actions",
     header: "",
     cell: ({ row }) => {
       const newsItem = row.original;
+      return <ActionsCell newsItem={newsItem} />;
     },
   },
 ];
